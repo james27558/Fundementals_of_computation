@@ -1,20 +1,22 @@
 import java.util.ArrayList;
+import java.util.List;
 
 public class Node {
-    static int node_count;
-    String label;
-    int id;
-    boolean isAccepting;
+    static private int nodeCount;
+    private final int ID;
 
-    ArrayList<Node> connections = new ArrayList<>();
+    public String label;
+    public boolean isAccepting;
 
-    Node(String label_) {
+    List<Node> connections = new ArrayList<>();
+
+    public Node(String label_) {
         label = label_;
-        id = node_count;
-        node_count++;
+        ID = nodeCount;
+        nodeCount++;
     }
 
-    Node(String label_, boolean isAccepting) {
+    public Node(String label_, boolean isAccepting) {
         this(label_);
 
         isAccepting = true;
@@ -27,6 +29,6 @@ public class Node {
             connections_string_array[i] = connections.get(i).label;
         }
 
-        return "Label: " + label + ", Id: " + id + ", Connections: " + String.join(",", connections_string_array);
+        return "Label: " + label + ", Id: " + ID + ", Connections: " + String.join(",", connections_string_array);
     }
 }
