@@ -1,3 +1,5 @@
+package automata.core;
+
 import java.util.ArrayList;
 
 public class Graph {
@@ -31,8 +33,8 @@ public class Graph {
         Node n1 = null;
         Node n2 = null;
         for (Node n : nodes) {
-            if (n.id == id1) n1 = n;
-            if (n.id == id2) n2 = n;
+            if (n.getID() == id1) n1 = n;
+            if (n.getID() == id2) n2 = n;
         }
 
         connectNodes(n1, n2);
@@ -63,7 +65,7 @@ public class Graph {
 
     void setStartNode(int id) {
         for (Node n : nodes) {
-            if (n.id == id) {
+            if (n.getID() == id) {
                 startNode = n;
                 return;
             }
@@ -86,7 +88,7 @@ public class Graph {
     void makeNodeAccepting(String label) {
         for (Node n : nodes) {
             if (n.label == label) {
-                n.isAccepting = true;
+                n.setAccepting(true);
                 return;
             }
         }

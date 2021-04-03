@@ -1,3 +1,5 @@
+package automata.core;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -8,11 +10,11 @@ public class GraphTest {
     private Graph g;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         g = new Graph(new String[]{"a", "b", "c"});
     }
 
-    public void setUpBasicNodes() {
+    void setUpBasicNodes() {
         g.addNode(new Node("A"));
         g.addNode(new Node("B"));
         g.addNode(new Node("C"));
