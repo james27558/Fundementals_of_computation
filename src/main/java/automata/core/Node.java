@@ -4,19 +4,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Node {
-    static private int nodeCount;
 
     /**
      * The label should be unique in a graph
      */
     private String label;
 
-    List<Node> connections = new ArrayList<>();
+    private List<Transition> transitions = new ArrayList<>();
 
     private boolean isAccepting;
 
     protected Node() {
-        nodeCount++;
     }
 
     /**
@@ -26,7 +24,6 @@ public class Node {
      */
     public Node(String label_) {
         label = label_;
-        nodeCount++;
     }
 
     /**
@@ -51,8 +48,53 @@ public class Node {
     /**
      * @param accepting Sets whether the node is accepting
      */
-    void setAccepting(boolean accepting) {
+    public void setAccepting(boolean accepting) {
         isAccepting = accepting;
+    }
+
+    public List<Transition> getTransitions() {
+        return transitions;
+    }
+
+    /**
+     * Adds a transition to the node
+     *
+     * @param t Transition to add
+     */
+    public void addTransition(Transition t) {
+        transitions.add(t);
+    }
+
+    /**
+     * Checks whether a symbol applied to this node would cause 1 or more transitions from it
+     *
+     * @param symbol
+     * @return
+     */
+    public boolean willSymbolCauseTransition(Symbol symbol) {
+        for (Transition t : getTransitions()) {
+            if (t.willSymbolCauseTransition(symbol)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Applies a symbol to this node and returns the destination node of all the transitions from it that would be
+     * activated by that symbol
+     *
+     * @param symbol Symbol to apply to the node
+     * @return The destination nodes that have a transition over the given symbol
+     */
+    public List<Node> getDestinationNodesAfterTransition(Symbol symbol) {
+        List<Node> destinationNodes = new ArrayList<>();
+        for (Transition t : getTransitions()) {
+            if (t.willSymbolCauseTransition(symbol)) destinationNodes.add(t.getDestination());
+        }
+
+        return destinationNodes;
     }
 
     /**
@@ -68,11 +110,12 @@ public class Node {
      * @return String representation of the node, including its label and list of connections
      */
     public String toString() {
-        // Convert the connections ArrayList to a String[] of the labels of the connections
-        String[] connections_string_array = new String[connections.size()];
-        for (int i = 0; i < connections.size(); i++) connections_string_array[i] = connections.get(i).getLabel();
+        // Convert the to an array of strings
+        String[] transitions_string_array = new String[transitions.size()];
+        for (int i = 0; i < transitions.size(); i++)
+            transitions_string_array[i] = transitions.get(i).getDestination().getLabel();
 
-        return "Label: " + getLabel() + ", Connections: " + String.join(",", connections_string_array);
+        return "Label: " + getLabel() + ", Connections: [" + String.join(",", transitions_string_array) + "]";
     }
 
 

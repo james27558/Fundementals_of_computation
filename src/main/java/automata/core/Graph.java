@@ -10,6 +10,9 @@ public class Graph {
 
 
     private List<Node> nodes;
+
+    private List<Transition> allTransitions;
+
     /**
      * This is the alphabet the Finite State Automata uses. It it set in the constructor and nowhere else
      */
@@ -25,16 +28,17 @@ public class Graph {
     public Graph(String[] alphabet) {
         this.alphabet = alphabet;
         nodes = new ArrayList<>();
+        allTransitions = new ArrayList<>();
     }
 
     /**
-     * Checks whether a symbol is valid. A symbol must be 1 character and not a space
+     * Checks whether a symbol is valid
      *
      * @param symbol Symbol to check
      * @return Whether the symbol is valid
      */
     private static boolean isValidSymbol(String symbol) {
-        return symbol.length() == 1 && !symbol.equals(" ");
+        return true;
     }
 
     /**
@@ -84,9 +88,14 @@ public class Graph {
         if (!nodes.contains(n1)) throw new NodeNotFoundException(n1);
         if (!nodes.contains(n2)) throw new NodeNotFoundException(n2);
 
-
-        // Add the node
-        if (!n1.connections.contains(n2)) n1.connections.add(n2);
+        Transition transition = new Transition(n1, n2, transitionSymbol);
+        // Add the transition
+        if (!n1.getTransitions().contains(transition)) {
+            // Add the transition to the node
+            n1.addTransition(transition);
+            // Add the transition to the Graph
+            allTransitions.add(transition);
+        }
     }
 
     /**
@@ -97,23 +106,7 @@ public class Graph {
      * @param transitionSymbol The transition is performed when this symbol is seen
      */
     public void connectNodes(String label1, String label2, String transitionSymbol) {
-        // Validate the transitionSymbol
-        if (!isValidSymbol(transitionSymbol)) throw new InvalidSymbolException(transitionSymbol);
-        if (!doesAlphabetContain(transitionSymbol)) throw new SymbolNotFoundException(transitionSymbol);
-
-        Node n1 = null;
-        Node n2 = null;
-        for (Node n : nodes) {
-            if (n.equals(label1)) n1 = n;
-            if (n.equals(label2)) n2 = n;
-        }
-
-        // Check if the nodes exist in the graph
-        if (!nodes.contains(n1)) throw new NodeNotFoundException(n1);
-        if (!nodes.contains(n2)) throw new NodeNotFoundException(n2);
-
-        // Add the node
-        if (!n1.connections.contains(n2)) n1.connections.add(n2);
+        connectNodes(getNode(label1), getNode(label2), transitionSymbol);
     }
 
     /**
@@ -127,6 +120,30 @@ public class Graph {
             if (n.getLabel().equals(label)) return true;
         }
 
+        return false;
+    }
+
+    /**
+     * Looks through all nodes in the graph and determines whether the graph is an NFA or not (a DFA).
+     *
+     * @return true if the graph is an NFA, false if not
+     */
+    public boolean isNFA() {
+        for (Node node : getNodes()) {
+            // Make a list of the symbols that this node transitions over
+            List<Symbol> transitionSymbols = new ArrayList<>();
+
+            for (Transition transition : node.getTransitions()) {
+                // If the symbol already exists then it is an NFA, otherwise add the symbol to the list and keep going
+                if (transitionSymbols.contains(transition.getSymbol())) {
+                    return true;
+                } else {
+                    transitionSymbols.add(transition.getSymbol());
+                }
+            }
+        }
+
+        // If there has been no duplicate symbols in any node then it isn't an NFA (it is a DFA)
         return false;
     }
 
