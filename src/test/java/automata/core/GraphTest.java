@@ -1,20 +1,33 @@
 package automata.core;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class GraphTest {
 
-    private Graph g;
+    Graph setUpDFA() {
+        Graph g = setUpEmptyGraph();
 
-    @BeforeEach
-    void setUp() {
-        g = new Graph(new String[]{"a", "b", "c"});
+        g.addNode(new Node("A"));
+        g.addNode(new Node("B"));
+        g.addNode(new Node("C"));
+
+        g.connectNodes("A", "B", "a");
+        g.connectNodes("B", "A", "a");
+        g.connectNodes("A", "C", "b");
+        g.connectNodes("C", "B", "b");
+
+        return g;
     }
 
-    void setUpBasicNodes() {
+    Graph setUpEmptyGraph() {
+        return new Graph(new String[]{"a", "b", "c"});
+    }
+
+    Graph setUpBasicNodes() {
+        Graph g = new Graph(new String[]{"a", "b", "c"});
+
         g.addNode(new Node("A"));
         g.addNode(new Node("B"));
         g.addNode(new Node("C"));
@@ -24,16 +37,20 @@ public class GraphTest {
         g.connectNodes("B", "C", "a");
 
         g.makeNodeAccepting("C");
+
+        return g;
     }
 
-    public void setUpBasicGraph() {
-        setUpBasicNodes();
-
+    public Graph setUpBasicGraph() {
+        Graph g = setUpBasicNodes();
         g.setStartNode("A");
+        return g;
     }
 
     @Test
     public void testAddNodeAddsTheCorrectNode() {
+        Graph g = setUpEmptyGraph();
+
         Node n = new Node("A");
         g.addNode(n);
 
@@ -42,6 +59,8 @@ public class GraphTest {
 
     @Test
     public void testAddNodes_WithDuplicateLabels_ThrowsLabelAlreadyExistsException() {
+        Graph g = setUpEmptyGraph();
+
         Node n1 = new Node("A");
         Node n2 = new Node("A");
         g.addNode(n1);
@@ -53,13 +72,15 @@ public class GraphTest {
 
     @Test
     public void testGetNode() {
-        setUpBasicNodes();
+        Graph g = setUpBasicNodes();
         // get(0) is node "A"
         assertEquals(g.getNodes().get(0), g.getNode("A"));
     }
 
     @Test
     public void testGetNode_WhenNodeDoesNotExist_ThrowsNodeNotFoundException() {
+        Graph g = setUpEmptyGraph();
+
         assertThrows(NodeNotFoundException.class, () -> {
             g.getNode("A");
         });
@@ -67,12 +88,16 @@ public class GraphTest {
 
     @Test
     public void testAddingSingularNode() {
+        Graph g = setUpEmptyGraph();
+
         g.addNode(new Node("A"));
         assertTrue(g.containsNode("A"));
     }
 
     @Test
     public void testContainsNode() {
+        Graph g = setUpEmptyGraph();
+
         Node n = new Node("A");
         g.addNode(n);
 
@@ -81,7 +106,7 @@ public class GraphTest {
 
     @Test
     public void testSetStartingNode() {
-        setUpBasicNodes();
+        Graph g = setUpBasicNodes();
 
         g.setStartNode("A");
 
@@ -90,10 +115,26 @@ public class GraphTest {
 
     @Test
     public void testMakeNodeAccepting() {
+        Graph g = setUpEmptyGraph();
+
         Node n = new Node("A");
         g.addNode(n);
         g.makeNodeAccepting("A");
 
         assertTrue(n.isAccepting());
+    }
+
+    @Test
+    public void testisNFA_True() {
+        Graph g = setUpBasicGraph();
+
+        assertTrue(g.isNFA());
+    }
+
+    @Test
+    public void testisNFA_False() {
+        Graph g = setUpDFA();
+
+        assertFalse(g.isNFA());
     }
 }
