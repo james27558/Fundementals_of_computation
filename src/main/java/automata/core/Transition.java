@@ -63,6 +63,6 @@ public class Transition {
     }
 
     public String toString() {
-        return "Source: " + getSource() + ", Destination: " + getDestination() + ", Symbol: '" + getSymbol() + "'";
+        return "Transition: " + getSource() + " => " + getDestination() + " by '" + getSymbol() + "'";
     }
 }

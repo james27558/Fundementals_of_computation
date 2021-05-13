@@ -115,7 +115,7 @@ public class Node {
         for (int i = 0; i < transitions.size(); i++)
             transitions_string_array[i] = transitions.get(i).getDestination().getLabel();
 
-        return "Label: " + getLabel() + ", Connections: [" + String.join(",", transitions_string_array) + "]";
+        return "{Label [" + getLabel() + " Connections: [" + String.join(",", transitions_string_array) + "]}";
     }
 
 
