@@ -137,4 +137,61 @@ public class GraphTest {
 
         assertFalse(g.isNFA());
     }
+
+    /**
+     * This function returns a graph that accepts words over the language {"a"} that have an even number of a's
+     *
+     * @return Automaton as specified
+     */
+    public Graph setUpEvenNumberOfAs_DFA() {
+        Graph g = new Graph(new String[]{"a"});
+
+        g.addNode(new Node("Accepting"));
+        g.addNode(new Node("Non-Accepting"));
+
+        g.connectNodes("Accepting", "Non-Accepting", "a");
+        g.connectNodes("Non-Accepting", "Accepting", "a");
+
+        g.makeNodeAccepting("Accepting");
+
+        g.setStartNode("Accepting");
+
+        return g;
+    }
+
+    @Test
+    public void testPassingWordThroughAutomaton_AcceptValidWords() {
+        Graph g = setUpEvenNumberOfAs_DFA();
+
+        // Test words with an even number of a's.
+        // 2 a's, 4 a's, 6 a's, 8 a's, 10 a's
+        for (int i = 0; i <= 10; i += 2) {
+            g.startTestingWord();
+
+            // Pass the number of a's currently being tested
+            for (int j = 0; j < i; j++) {
+                g.stepTestingWord("a");
+            }
+
+            assertTrue(g.endTestingWord(), "Word with " + i + " a's was not accepted by the automaton when it should've been");
+        }
+    }
+
+    @Test
+    public void testPassingWordThroughAutomaton_NotAcceptInvalidWords() {
+        Graph g = setUpEvenNumberOfAs_DFA();
+
+        // Test words with an odd number of a's.
+        // 1 a's, 3 a's, 5 a's, 7 a's, 9 a's, 11 a's
+        for (int i = 1; i <= 11; i += 2) {
+            g.startTestingWord();
+
+            // Pass the number of a's currently being tested
+            for (int j = 0; j < i; j++) {
+                g.stepTestingWord("a");
+            }
+
+            assertFalse(g.endTestingWord(), "Word with " + i + " a's was accepted by the automaton when it should've been");
+        }
+    }
 }
