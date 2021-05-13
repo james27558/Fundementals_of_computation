@@ -196,12 +196,12 @@ public class GraphTest {
     }
 
     /**
-     * This function returns a NFA detailed in the notes on page 22. It accepts all words in the language defined by the
+     * This function returns a DFA detailed in the notes on page 22. It accepts all words in the language defined by the
      * regular expression (ab*a)|(ba*b)
      *
      * @return Automaton as specified
      */
-    public Graph setUpNFA1() {
+    public Graph setUpDFA1() {
         Graph g = new Graph(new String[]{"a", "b"});
 
         g.addNode(new Node("0"));
@@ -232,8 +232,8 @@ public class GraphTest {
     }
 
     @Test
-    public void testPassingWordsThroughNFA1_AcceptValidWords() {
-        Graph g = setUpNFA1();
+    public void testPassingWordsThroughDFA1_AcceptValidWords() {
+        Graph g = setUpDFA1();
 
         // Test words that are accepted by this automaton
         String[] validWords = new String[]{"aba", "abba", "abbba", "bab", "baab", "baaab"};
@@ -254,8 +254,8 @@ public class GraphTest {
     }
 
     @Test
-    public void testPassingWordsThroughNFA1_NotAcceptInvalidWords() {
-        Graph g = setUpNFA1();
+    public void testPassingWordsThroughDFA1_NotAcceptInvalidWords() {
+        Graph g = setUpDFA1();
 
         // Test words that are not accepted by this automaton
         String[] invalidWords = new String[]{"a", "b", "abb", "abbb", "abaa", "abaaa", "aaba"};
