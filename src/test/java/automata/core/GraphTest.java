@@ -160,7 +160,7 @@ public class GraphTest {
     }
 
     @Test
-    public void testPassingWordThroughAutomaton_AcceptValidWords() {
+    public void testPassingWordThroughEvenAsDFA_AcceptValidWords() {
         Graph g = setUpEvenNumberOfAs_DFA();
 
         // Test words with an even number of a's.
@@ -178,7 +178,7 @@ public class GraphTest {
     }
 
     @Test
-    public void testPassingWordThroughAutomaton_NotAcceptInvalidWords() {
+    public void testPassingWordThroughEvenAsDFA_NotAcceptInvalidWords() {
         Graph g = setUpEvenNumberOfAs_DFA();
 
         // Test words with an odd number of a's.
@@ -192,6 +192,86 @@ public class GraphTest {
             }
 
             assertFalse(g.endTestingWord(), "Word with " + i + " a's was accepted by the automaton when it should've been");
+        }
+    }
+
+    /**
+     * This function returns a NFA detailed in the notes on page 22. It accepts all words in the language defined by the
+     * regular expression (ab*a)|(ba*b)
+     *
+     * @return Automaton as specified
+     */
+    public Graph setUpNFA1() {
+        Graph g = new Graph(new String[]{"a", "b"});
+
+        g.addNode(new Node("0"));
+        g.addNode(new Node("0a"));
+        g.addNode(new Node("0b"));
+        g.addNode(new Node("1"));
+        g.addNode(new Node("2"));
+
+        g.setStartNode("0");
+
+        g.connectNodes("0", "0a", "a");
+        g.connectNodeToSelf("0a", "b");
+        g.connectNodes("0a", "1", "a");
+
+        g.connectNodes("0", "0b", "b");
+        g.connectNodeToSelf("0b", "a");
+        g.connectNodes("0b", "1", "b");
+
+        g.connectNodes("1", "2", "a");
+        g.connectNodes("1", "2", "b");
+
+        g.connectNodeToSelf("2", "a");
+        g.connectNodeToSelf("2", "b");
+
+        g.makeNodeAccepting("1");
+
+        return g;
+    }
+
+    @Test
+    public void testPassingWordsThroughNFA1_AcceptValidWords() {
+        Graph g = setUpNFA1();
+
+        // Test words that are accepted by this automaton
+        String[] validWords = new String[]{"aba", "abba", "abbba", "bab", "baab", "baaab"};
+
+        for (String validWord : validWords) {
+            g.startTestingWord();
+
+            // Pass the word through the automaton
+            for (int i = 0; i < validWord.length(); i++) {
+                String symbol = String.valueOf(validWord.charAt(i));
+
+                g.stepTestingWord(symbol);
+            }
+
+            // It should be accepted
+            assertTrue(g.endTestingWord(), "The word " + validWord + " was not accepted by the automaton when it should've been");
+        }
+    }
+
+    @Test
+    public void testPassingWordsThroughNFA1_NotAcceptInvalidWords() {
+        Graph g = setUpNFA1();
+
+        // Test words that are not accepted by this automaton
+        String[] invalidWords = new String[]{"a", "b", "abb", "abbb", "abaa", "abaaa", "aaba"};
+
+        for (String invalidWord : invalidWords) {
+            g.startTestingWord();
+
+            // Pass the word through the automaton
+            for (int i = 0; i < invalidWord.length(); i++) {
+                String symbol = String.valueOf(invalidWord.charAt(i));
+
+                g.stepTestingWord(symbol);
+            }
+
+            // It should not be accepted
+            assertFalse(g.endTestingWord(), "The word " + invalidWord + " was accepted by the automaton when it shouldn't have been");
         }
     }
 }
