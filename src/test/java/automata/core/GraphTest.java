@@ -137,4 +137,141 @@ public class GraphTest {
 
         assertFalse(g.isNFA());
     }
+
+    /**
+     * This function returns a graph that accepts words over the language {"a"} that have an even number of a's
+     *
+     * @return Automaton as specified
+     */
+    public Graph setUpEvenNumberOfAs_DFA() {
+        Graph g = new Graph(new String[]{"a"});
+
+        g.addNode(new Node("Accepting"));
+        g.addNode(new Node("Non-Accepting"));
+
+        g.connectNodes("Accepting", "Non-Accepting", "a");
+        g.connectNodes("Non-Accepting", "Accepting", "a");
+
+        g.makeNodeAccepting("Accepting");
+
+        g.setStartNode("Accepting");
+
+        return g;
+    }
+
+    @Test
+    public void testPassingWordThroughEvenAsDFA_AcceptValidWords() {
+        Graph g = setUpEvenNumberOfAs_DFA();
+
+        // Test words with an even number of a's.
+        // 2 a's, 4 a's, 6 a's, 8 a's, 10 a's
+        for (int i = 0; i <= 10; i += 2) {
+            g.startTestingWord();
+
+            // Pass the number of a's currently being tested
+            for (int j = 0; j < i; j++) {
+                g.stepTestingWord("a");
+            }
+
+            assertTrue(g.endTestingWord(), "Word with " + i + " a's was not accepted by the automaton when it should've been");
+        }
+    }
+
+    @Test
+    public void testPassingWordThroughEvenAsDFA_NotAcceptInvalidWords() {
+        Graph g = setUpEvenNumberOfAs_DFA();
+
+        // Test words with an odd number of a's.
+        // 1 a's, 3 a's, 5 a's, 7 a's, 9 a's, 11 a's
+        for (int i = 1; i <= 11; i += 2) {
+            g.startTestingWord();
+
+            // Pass the number of a's currently being tested
+            for (int j = 0; j < i; j++) {
+                g.stepTestingWord("a");
+            }
+
+            assertFalse(g.endTestingWord(), "Word with " + i + " a's was accepted by the automaton when it should've been");
+        }
+    }
+
+    /**
+     * This function returns a DFA detailed in the notes on page 22. It accepts all words in the language defined by the
+     * regular expression (ab*a)|(ba*b)
+     *
+     * @return Automaton as specified
+     */
+    public Graph setUpDFA1() {
+        Graph g = new Graph(new String[]{"a", "b"});
+
+        g.addNode(new Node("0"));
+        g.addNode(new Node("0a"));
+        g.addNode(new Node("0b"));
+        g.addNode(new Node("1"));
+        g.addNode(new Node("2"));
+
+        g.setStartNode("0");
+
+        g.connectNodes("0", "0a", "a");
+        g.connectNodeToSelf("0a", "b");
+        g.connectNodes("0a", "1", "a");
+
+        g.connectNodes("0", "0b", "b");
+        g.connectNodeToSelf("0b", "a");
+        g.connectNodes("0b", "1", "b");
+
+        g.connectNodes("1", "2", "a");
+        g.connectNodes("1", "2", "b");
+
+        g.connectNodeToSelf("2", "a");
+        g.connectNodeToSelf("2", "b");
+
+        g.makeNodeAccepting("1");
+
+        return g;
+    }
+
+    @Test
+    public void testPassingWordsThroughDFA1_AcceptValidWords() {
+        Graph g = setUpDFA1();
+
+        // Test words that are accepted by this automaton
+        String[] validWords = new String[]{"aba", "abba", "abbba", "bab", "baab", "baaab"};
+
+        for (String validWord : validWords) {
+            g.startTestingWord();
+
+            // Pass the word through the automaton
+            for (int i = 0; i < validWord.length(); i++) {
+                String symbol = String.valueOf(validWord.charAt(i));
+
+                g.stepTestingWord(symbol);
+            }
+
+            // It should be accepted
+            assertTrue(g.endTestingWord(), "The word " + validWord + " was not accepted by the automaton when it should've been");
+        }
+    }
+
+    @Test
+    public void testPassingWordsThroughDFA1_NotAcceptInvalidWords() {
+        Graph g = setUpDFA1();
+
+        // Test words that are not accepted by this automaton
+        String[] invalidWords = new String[]{"a", "b", "abb", "abbb", "abaa", "abaaa", "aaba"};
+
+        for (String invalidWord : invalidWords) {
+            g.startTestingWord();
+
+            // Pass the word through the automaton
+            for (int i = 0; i < invalidWord.length(); i++) {
+                String symbol = String.valueOf(invalidWord.charAt(i));
+
+                g.stepTestingWord(symbol);
+            }
+
+            // It should not be accepted
+            assertFalse(g.endTestingWord(), "The word " + invalidWord + " was accepted by the automaton when it shouldn't have been");
+        }
+    }
 }

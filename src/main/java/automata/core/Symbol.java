@@ -26,4 +26,8 @@ public class Symbol {
         return Objects.equals(stringRepresentation, symbol.stringRepresentation);
     }
 
+    @Override
+    public String toString() {
+        return stringRepresentation;
+    }
 }
