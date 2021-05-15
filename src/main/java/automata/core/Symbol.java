@@ -1,8 +1,11 @@
 package automata.core;
 
+import java.io.Serializable;
 import java.util.Objects;
 
-public class Symbol {
+public class Symbol implements Serializable {
+    private static final long serialVersionUID = 7001254062522064867L;
+
     public static final Symbol EPSILON = fromString("");
     private String stringRepresentation;
     private boolean isEpsilon;

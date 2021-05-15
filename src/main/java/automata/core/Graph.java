@@ -1,13 +1,17 @@
 package automata.core;
 
+import java.io.*;
+import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * This structure represents a graph of an automaton, whether it be deterministic or non deterministic
  */
-public class Graph {
-
+public class Graph implements Serializable {
+    private static final long serialVersionUID = -1474631563182818239L;
 
     private List<Node> nodes;
 
@@ -32,6 +36,36 @@ public class Graph {
         this.alphabet = alphabet;
         nodes = new ArrayList<>();
         allTransitions = new ArrayList<>();
+    }
+
+    public static Graph load(String path) throws IOException, ClassNotFoundException {
+        FileInputStream fileInputStream = new FileInputStream(path);
+        ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
+
+        Graph g = (Graph) objectInputStream.readObject();
+
+        fileInputStream.close();
+        objectInputStream.close();
+
+        return g;
+    }
+
+    public static Graph load(Path path) throws IOException, ClassNotFoundException {
+        return load(path.toAbsolutePath().toString());
+    }
+
+    public void save(String path) throws IOException {
+        FileOutputStream fileOutputStream = new FileOutputStream(path);
+        ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
+
+        objectOutputStream.writeObject(this);
+
+        objectOutputStream.close();
+        fileOutputStream.close();
+    }
+
+    public void save(Path path) throws IOException {
+        save(path.toAbsolutePath().toString());
     }
 
     /**
@@ -283,5 +317,18 @@ public class Graph {
         return s.toString();
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Graph graph = (Graph) o;
+        return currentlyTestingWord == graph.currentlyTestingWord && nodes.equals(graph.nodes) && Objects.equals(currentPositions, graph.currentPositions) && allTransitions.equals(graph.allTransitions) && Arrays.equals(alphabet, graph.alphabet) && Objects.equals(startNode, graph.startNode);
+    }
 
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(nodes, currentPositions, currentlyTestingWord, allTransitions, startNode);
+        result = 31 * result + Arrays.hashCode(alphabet);
+        return result;
+    }
 }

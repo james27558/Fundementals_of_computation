@@ -1,6 +1,10 @@
 package automata.core;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+
+import java.io.IOException;
+import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -274,4 +278,48 @@ public class GraphTest {
             assertFalse(g.endTestingWord(), "The word " + invalidWord + " was accepted by the automaton when it shouldn't have been");
         }
     }
+
+    @Test
+    public void serializationTestEmptyGraph(@TempDir Path tempDir) throws IOException, ClassNotFoundException {
+        Graph g = new Graph(new String[]{"a"});
+
+        Path filepath = tempDir.resolve("serializationTestOut.ser");
+
+        g.save(filepath);
+
+        Graph loadedGraph = Graph.load(filepath);
+
+        assertEquals(loadedGraph, g);
+    }
+
+    @Test
+    public void serializationTestGraphWithOneNode(@TempDir Path tempDir) throws IOException, ClassNotFoundException {
+        Graph g = new Graph(new String[]{"a"});
+        g.addNode(new Node("A"));
+
+        Path filepath = tempDir.resolve("serializationTestOut.ser");
+
+        g.save(filepath);
+
+        Graph loadedGraph = Graph.load(filepath);
+
+        assertEquals(loadedGraph, g);
+    }
+
+    @Test
+    public void serializationTestGraphWithConnections(@TempDir Path tempDir) throws IOException, ClassNotFoundException {
+        Graph g = new Graph(new String[]{"a"});
+        g.addNode(new Node("A"));
+        g.addNode(new Node("B"));
+        g.connectNodes("A", "B", "a");
+
+        Path filepath = tempDir.resolve("serializationTestOut.ser");
+
+        g.save(filepath);
+
+        Graph loadedGraph = Graph.load(filepath);
+
+        assertEquals(loadedGraph, g);
+    }
+
 }

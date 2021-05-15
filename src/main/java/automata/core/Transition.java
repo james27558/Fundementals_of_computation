@@ -1,6 +1,11 @@
 package automata.core;
 
-public class Transition {
+import java.io.Serializable;
+import java.util.Objects;
+
+public class Transition implements Serializable {
+    private static final long serialVersionUID = 2181774961527237861L;
+
     private Node source;
     private Node destination;
 
@@ -64,5 +69,18 @@ public class Transition {
 
     public String toString() {
         return "Transition: " + getSource() + " => " + getDestination() + " by '" + getSymbol() + "'";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Transition that = (Transition) o;
+        return source.equals(that.source.getLabel()) && destination.equals(that.destination.getLabel()) && symbol.equals(that.symbol);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(source, destination, symbol);
     }
 }

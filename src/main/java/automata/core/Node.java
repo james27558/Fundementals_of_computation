@@ -1,9 +1,11 @@
 package automata.core;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Node {
+public class Node implements Serializable {
+    private static final long serialVersionUID = -4082132092395620031L;
 
     /**
      * The label should be unique in a graph
@@ -13,9 +15,6 @@ public class Node {
     private List<Transition> transitions = new ArrayList<>();
 
     private boolean isAccepting;
-
-    protected Node() {
-    }
 
     /**
      * Initialises a newly created node with a unique <code>label</code>
@@ -119,12 +118,33 @@ public class Node {
     }
 
 
-    public boolean equals(Node node) {
-        return getLabel().equals(node.getLabel());
-    }
-
     public boolean equals(String label) {
         return getLabel().equals(label);
+    }
+
+    /**
+     * Checks if a given node and this node are equal in every way, used for checking the structure of Graphs. Checks
+     * whether a given node has the same label and transitions.
+     *
+     * @param n Node to compare to
+     * @return Whether this node and the given node are equivalent
+     */
+    public boolean equals(Object n) {
+        if (n == null) return false;
+
+        Node node = (Node) n;
+
+        // Check the labels are the same
+        if (!getLabel().equals(node.getLabel())) return false;
+
+        // Check the nodes have the same transitions
+        List<Transition> targetNodeTransitions = node.getTransitions();
+        for (Transition thisNodeTransition : getTransitions()) {
+            if (!targetNodeTransitions.contains(thisNodeTransition)) return false;
+        }
+
+        // If all checks pass, n is exactly equivalent to this node
+        return true;
     }
 
 }
