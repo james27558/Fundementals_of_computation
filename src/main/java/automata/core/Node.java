@@ -10,9 +10,9 @@ public class Node implements Serializable {
     /**
      * The label should be unique in a graph
      */
-    private String label;
+    private final String label;
 
-    private List<Transition> transitions = new ArrayList<>();
+    private final List<Transition> transitions = new ArrayList<>();
 
     private boolean isAccepting;
 
@@ -67,8 +67,8 @@ public class Node implements Serializable {
     /**
      * Checks whether a symbol applied to this node would cause 1 or more transitions from it
      *
-     * @param symbol
-     * @return
+     * @param symbol Symbol to test
+     * @return true if the symbol would cause a transition, false if not
      */
     public boolean willSymbolCauseTransition(Symbol symbol) {
         for (Transition t : getTransitions()) {
@@ -114,7 +114,7 @@ public class Node implements Serializable {
         for (int i = 0; i < transitions.size(); i++)
             transitions_string_array[i] = transitions.get(i).getDestination().getLabel();
 
-        return "{Label [" + getLabel() + " Connections: [" + String.join(",", transitions_string_array) + "]}";
+        return "{Label [" + getLabel() + "]" + " Connections: [" + String.join(",", transitions_string_array) + "]}";
     }
 
 
@@ -137,10 +137,16 @@ public class Node implements Serializable {
         // Check the labels are the same
         if (!getLabel().equals(node.getLabel())) return false;
 
-        // Check the nodes have the same transitions
         List<Transition> targetNodeTransitions = node.getTransitions();
+
+        // Check this nodes transitions are a subset of the target nodes transitions
         for (Transition thisNodeTransition : getTransitions()) {
             if (!targetNodeTransitions.contains(thisNodeTransition)) return false;
+        }
+
+        // Check the target nodes transitions are a subset of this nodes transitions
+        for (Transition targetNodeTransition : targetNodeTransitions) {
+            if (!getTransitions().contains(targetNodeTransition)) return false;
         }
 
         // If all checks pass, n is exactly equivalent to this node

@@ -38,6 +38,14 @@ public class Graph implements Serializable {
         allTransitions = new ArrayList<>();
     }
 
+    /**
+     * Loads a Graph from a file. This file must contain a serialised Graph.
+     *
+     * @param path Path of the file to load from
+     * @return Graph loaded from the file
+     * @throws IOException            If there is a problem loading from the file
+     * @throws ClassNotFoundException Class of the serialised object can't be found
+     */
     public static Graph load(String path) throws IOException, ClassNotFoundException {
         FileInputStream fileInputStream = new FileInputStream(path);
         ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
@@ -50,10 +58,24 @@ public class Graph implements Serializable {
         return g;
     }
 
+    /**
+     * Loads a Graph from a file. This file must contain a serialised Graph.
+     *
+     * @param path Path of the file to load from
+     * @return Graph loaded from the file
+     * @throws IOException            If there is a problem loading from the file
+     * @throws ClassNotFoundException Class of the serialised object can't be found
+     */
     public static Graph load(Path path) throws IOException, ClassNotFoundException {
         return load(path.toAbsolutePath().toString());
     }
 
+    /**
+     * Serialised the graph to a file
+     *
+     * @param path Path of the file to serialise the graph to
+     * @throws IOException If there is a problem writing to the file
+     */
     public void save(String path) throws IOException {
         FileOutputStream fileOutputStream = new FileOutputStream(path);
         ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
@@ -64,6 +86,12 @@ public class Graph implements Serializable {
         fileOutputStream.close();
     }
 
+    /**
+     * Serialised the graph to a file
+     *
+     * @param path Path of the file to serialise the graph to
+     * @throws IOException If there is a problem writing to the file
+     */
     public void save(Path path) throws IOException {
         save(path.toAbsolutePath().toString());
     }
@@ -243,7 +271,7 @@ public class Graph implements Serializable {
      *
      * @return true if the word is accepted, false if the word isn't accepted
      */
-    public boolean endTestingWord() {
+    public boolean stopTestingWord() {
         currentlyTestingWord = false;
 
         for (Node node : getCurrentPositions()) {
@@ -307,6 +335,28 @@ public class Graph implements Serializable {
         throw new NodeNotFoundException(label);
     }
 
+    /**
+     * Removes a node from the Graph, also removes all transitions that have the removed node as a destination
+     *
+     * @param label Label of the node to remove
+     */
+    public void removeNode(String label) {
+        removeNode(getNode(label));
+    }
+
+    /**
+     * Removes a node from the Graph, also removes all transitions that have the removed node as a destination
+     *
+     * @param node Node to remove
+     */
+    private void removeNode(Node node) {
+        for (Node iterationNode : getNodes()) {
+            iterationNode.getTransitions().removeIf(transition -> transition.getDestination().equals(node));
+        }
+
+        getNodes().remove(node);
+    }
+
     public String toString() {
         StringBuilder s = new StringBuilder();
 
@@ -317,6 +367,13 @@ public class Graph implements Serializable {
         return s.toString();
     }
 
+    /**
+     * Returns if a given graph is equal to this one. All nodes must have the exact same set of transitions and nodes
+     * must have the same labels and attributes
+     *
+     * @param o Object to compare to
+     * @return Whether a given Graph and this one equal
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

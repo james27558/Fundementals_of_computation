@@ -219,7 +219,8 @@ public class GraphTest {
                 g.stepTestingWord("a");
             }
 
-            assertTrue(g.endTestingWord(), "Word with " + i + " a's was not accepted by the automaton when it should've been");
+            assertTrue(g.stopTestingWord(), "Word with " + i + " a's was not accepted by the automaton when it " +
+                    "should've been");
         }
     }
 
@@ -237,7 +238,8 @@ public class GraphTest {
                 g.stepTestingWord("a");
             }
 
-            assertFalse(g.endTestingWord(), "Word with " + i + " a's was accepted by the automaton when it should've been");
+            assertFalse(g.stopTestingWord(), "Word with " + i + " a's was accepted by the automaton when it should've" +
+                    " been");
         }
     }
 
@@ -295,7 +297,7 @@ public class GraphTest {
             }
 
             // It should be accepted
-            assertTrue(g.endTestingWord(), "The word " + validWord + " was not accepted by the automaton when it should've been");
+            assertTrue(g.stopTestingWord(), "The word " + validWord + " was not accepted by the automaton when it should've been");
         }
     }
 
@@ -317,7 +319,7 @@ public class GraphTest {
             }
 
             // It should not be accepted
-            assertFalse(g.endTestingWord(), "The word " + invalidWord + " was accepted by the automaton when it shouldn't have been");
+            assertFalse(g.stopTestingWord(), "The word " + invalidWord + " was accepted by the automaton when it shouldn't have been");
         }
     }
 
