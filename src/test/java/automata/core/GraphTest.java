@@ -45,7 +45,7 @@ public class GraphTest {
         return g;
     }
 
-    public Graph setUpBasicGraph() {
+    Graph setUpBasicGraph() {
         Graph g = setUpBasicNodes();
         g.setStartNode("A");
         return g;
@@ -109,6 +109,15 @@ public class GraphTest {
     }
 
     @Test
+    public void testContainsNodeReturnsFalse() {
+        Graph g = setUpEmptyGraph();
+
+        Node n = new Node("A");
+
+        assertFalse(g.containsNode(n.getLabel()));
+    }
+
+    @Test
     public void testSetStartingNode() {
         Graph g = setUpBasicNodes();
 
@@ -126,6 +135,30 @@ public class GraphTest {
         g.makeNodeAccepting("A");
 
         assertTrue(n.isAccepting());
+    }
+
+    @Test
+    public void testConnectNodes() {
+        Graph g = new Graph(new String[]{"a"});
+        Node nodeA = new Node("A");
+        Node nodeB = new Node("B");
+        g.addNode(nodeA);
+        g.addNode(nodeB);
+        g.connectNodes("A", "B", "a");
+
+        assertEquals(nodeA.getTransitions().get(0).getDestination(), nodeB);
+    }
+
+    @Test
+    public void testConnectNodes_ThrowsSymbolNotFoundException() {
+        Graph g = new Graph(new String[]{"a"});
+        Node nodeA = new Node("A");
+        Node nodeB = new Node("B");
+        g.addNode(nodeA);
+        g.addNode(nodeB);
+        assertThrows(SymbolNotFoundException.class, () -> {
+            g.connectNodes("A", "B", "b");
+        });
     }
 
     @Test
@@ -161,6 +194,15 @@ public class GraphTest {
         g.setStartNode("Accepting");
 
         return g;
+    }
+
+    @Test
+    public void testStepTestingWord_ThrowsRuntimeException_WhenStartTestingWordHasntBeenCalled() {
+        Graph g = setUpEvenNumberOfAs_DFA();
+
+        assertThrows(RuntimeException.class, () -> {
+            g.stepTestingWord("a");
+        });
     }
 
     @Test
