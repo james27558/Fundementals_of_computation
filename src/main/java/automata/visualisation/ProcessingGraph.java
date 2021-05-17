@@ -20,7 +20,7 @@ public class ProcessingGraph {
      * Takes a Graph and adds the nodes in the graph to this automata.visualisation.ProcessingGraph object with the
      * coordinates of the nodes initialised to a default value
      *
-     * @param g
+     * @param g The graph to display
      */
     public ProcessingGraph(Graph g) {
         this.g = g;
@@ -49,19 +49,33 @@ public class ProcessingGraph {
         throw new NodeNotFoundException(node);
     }
 
-    public void addNode() {
+    public void addNode(Node node, int nodeX, int nodeY) {
+        getGraph().addNode(node);
 
+        ProcessingNode newProcessingNode = new ProcessingNode(node);
+        newProcessingNode.setX(nodeX);
+        newProcessingNode.setY(nodeY);
+
+        nodes.add(newProcessingNode);
     }
 
-//    /**
-//     * Takes a point and repels this processing node away from it by a small step
-//     */
-//    public void performForceDirectedStep() {
-//        for (Node n1 : g.nodes) {
-//            if (n1 instanceof automata.visualisation.ProcessingNode) automata.visualisation.ProcessingNode processingNode1 = (automata.visualisation.ProcessingNode) n1;
-//
-//            for (Node n2 : g.nodes) {
-//                automata.visualisation.ProcessingNode processingNode2 = (automata.visualisation.ProcessingNode) n2;
+    public void removeNode(ProcessingNode processingNode) {
+        // Remove the node from 'nodes'
+        getNodes().remove(processingNode);
+        // remove the node from the underlying Graph
+        getGraph().removeNode(processingNode.getNode().getLabel());
+    }
+
+    //    /**
+    //     * Takes a point and repels this processing node away from it by a small step
+    //     */
+    //    public void performForceDirectedStep() {
+    //        for (Node n1 : g.nodes) {
+    //            if (n1 instanceof automata.visualisation.ProcessingNode) automata.visualisation.ProcessingNode
+    //            processingNode1 = (automata.visualisation.ProcessingNode) n1;
+    //
+    //            for (Node n2 : g.nodes) {
+    //                automata.visualisation.ProcessingNode processingNode2 = (automata.visualisation.ProcessingNode) n2;
 //                processingNode1.performForceDirectedStep(processingNode2.x, processingNode2.y);
 //
 //            }

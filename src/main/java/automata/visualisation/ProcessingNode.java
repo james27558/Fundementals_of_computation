@@ -12,10 +12,14 @@ public class ProcessingNode {
 
     private Node node;
 
-    private boolean selected;
+    private boolean isCursorHoveringOver;
+
+    private boolean isSelectedAsSource;
 
     public ProcessingNode(Node node) {
         this.node = node;
+        x = 20;
+        y = 20;
     }
 
     public int getX() {
@@ -38,12 +42,20 @@ public class ProcessingNode {
         return node;
     }
 
-    public boolean isSelected() {
-        return selected;
+    public boolean isCursorHoveringOver() {
+        return isCursorHoveringOver;
     }
 
-    public void setSelected(boolean selected) {
-        this.selected = selected;
+    public void setCursorHoveringOver(boolean cursorHoveringOver) {
+        this.isCursorHoveringOver = cursorHoveringOver;
+    }
+
+    public boolean isSelectedAsSource() {
+        return isSelectedAsSource;
+    }
+
+    public void setSelectedAsSource(boolean selectedAsSource) {
+        isSelectedAsSource = selectedAsSource;
     }
 
     public void performForceDirectedStep(int repulsiveX, int repulsiveY) {
