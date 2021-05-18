@@ -13,7 +13,7 @@ public class Symbol implements Serializable {
     private Symbol() {
     }
 
-    static Symbol fromString(String s) {
+    static public Symbol fromString(String s) {
         Symbol symbol = new Symbol();
         symbol.stringRepresentation = s;
         symbol.isEpsilon = s.equals("");

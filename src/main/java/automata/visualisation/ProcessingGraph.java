@@ -66,6 +66,13 @@ public class ProcessingGraph {
         getGraph().removeNode(processingNode.getNode().getLabel());
     }
 
+    public void addTransition(ProcessingNode sourceNode, ProcessingNode destinationNode,
+                              String transitionSymbolString) {
+
+        getGraph().connectNodes(sourceNode.getNode().getLabel(), destinationNode.getNode().getLabel(),
+                transitionSymbolString);
+    }
+
     //    /**
     //     * Takes a point and repels this processing node away from it by a small step
     //     */
@@ -75,11 +82,12 @@ public class ProcessingGraph {
     //            processingNode1 = (automata.visualisation.ProcessingNode) n1;
     //
     //            for (Node n2 : g.nodes) {
-    //                automata.visualisation.ProcessingNode processingNode2 = (automata.visualisation.ProcessingNode) n2;
-//                processingNode1.performForceDirectedStep(processingNode2.x, processingNode2.y);
-//
-//            }
-//        }
-//
-//    }
+    //                automata.visualisation.ProcessingNode processingNode2 = (automata.visualisation.ProcessingNode)
+    //                n2;
+    //                processingNode1.performForceDirectedStep(processingNode2.x, processingNode2.y);
+    //
+    //            }
+    //        }
+    //
+    //    }
 }

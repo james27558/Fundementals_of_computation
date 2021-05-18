@@ -8,6 +8,7 @@ import processing.core.PApplet;
 import processing.event.MouseEvent;
 
 import javax.swing.*;
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
@@ -19,6 +20,7 @@ public class Window extends PApplet {
 
     ControlP5 controlP5;
     Textfield addNodeLabelTextfield;
+    Textfield addTransitionTransitionSymbol;
     Tool currentlySelectedTool = Tool.NO_TOOL;
 
 
@@ -35,11 +37,6 @@ public class Window extends PApplet {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        //        JFileChooser jFileChooser = new JFileChooser();
-        //        if (jFileChooser.showOpenDialog(new JPanel()) == JFileChooser.APPROVE_OPTION) {
-        //            File file = jFileChooser.getSelectedFile();
-        //        }
 
         ref = this;
 
@@ -59,6 +56,7 @@ public class Window extends PApplet {
     public void setup() {
         controlP5 = new ControlP5(this);
 
+        // Menu to make a new graph and input an alphabet for that graph, seperated by spaces
         Group g1 = controlP5.addGroup("Make New Graph")
                 .setPosition(0, 10)
                 .setWidth(180)
@@ -87,19 +85,19 @@ public class Window extends PApplet {
                     }
                 });
 
+        // Menu for a list of tools
         Group g2 = controlP5.addGroup("Tools")
                 .setPosition(180, 10)
                 .setWidth(120)
                 .setBackgroundHeight(100)
                 .setBackgroundColor(color(21));
 
-        RadioButton radioButton = controlP5.addRadio("Pick a tool");
-
-        radioButton.addItem("No Tool", 0)
-                .addItem("Add Node Tool", 1)
-                .addItem("Add Connection Tool", 2)
-                .addItem("Remove Node Tool", 3)
-                .addItem("Remove Connection Tool", 4)
+        RadioButton radioButton = controlP5.addRadio("Tools RadioButton")
+                .addItem("No Tool", 0)
+                .addItem("Add Node", 1)
+                .addItem("Add Transition", 2)
+                .addItem("Remove Node", 3)
+                .addItem("Remove Transition", 4)
                 .setGroup("Tools")
                 .setPosition(10, 10)
                 .setNoneSelectedAllowed(false)
@@ -110,28 +108,98 @@ public class Window extends PApplet {
                 .setPosition(300, 10)
                 .setWidth(100)
                 .setBackgroundHeight(50)
-                .setBackgroundColor(color(21));
+                .setBackgroundColor(color(21))
+                .hide()
+                .disableCollapse();
 
         addNodeLabelTextfield = controlP5.addTextfield("Node Label")
                 .setGroup("Add Node Menu")
                 .setPosition(20, 10)
                 .setWidth(60);
 
+        Group addTransition = controlP5.addGroup("Add Transition Menu")
+                .setPosition(300, 10)
+                .setWidth(100)
+                .setBackgroundHeight(50)
+                .setBackgroundColor(color(21))
+                .hide()
+                .disableCollapse();
+
+        addTransitionTransitionSymbol = controlP5.addTextfield("Transition Symbol")
+                .setGroup("Add Transition Menu")
+                .setPosition(20, 10)
+                .setWidth(60);
+
+        Group saveLoad = controlP5.addGroup("Save / Load")
+                .setPosition(400, 10)
+                .setWidth(80)
+                .setBackgroundHeight(70)
+                .setBackgroundColor(color(21));
+
+        controlP5.addButton("Save Graph")
+                .setPosition(10, 10)
+                .setWidth(60)
+                .setGroup("Save / Load")
+                .addListener(new ControlListener() {
+                    @Override
+                    public void controlEvent(ControlEvent theEvent) {
+                        // Make a new file chooser
+                        JFileChooser jFileChooser = new JFileChooser();
+
+                        // Show the file chooser to the user, if they select a file to save it in then call save the
+                        // graph
+                        if (jFileChooser.showSaveDialog(new JPanel()) == JFileChooser.APPROVE_OPTION) {
+                            File file = jFileChooser.getSelectedFile();
+
+                            try {
+                                pGraph.getGraph().save(file.getAbsolutePath());
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                });
+
+        controlP5.addButton("Load Graph")
+                .setPosition(10, 40)
+                .setWidth(60)
+                .setGroup("Save / Load")
+                .addListener(new ControlListener() {
+                    @Override
+                    public void controlEvent(ControlEvent theEvent) {
+                        // Make a new file chooser
+                        JFileChooser jFileChooser = new JFileChooser();
+
+                        // Show the file chooser to the user, if they select a file to save it in then call save the
+                        // graph
+                        if (jFileChooser.showOpenDialog(new JPanel()) == JFileChooser.APPROVE_OPTION) {
+                            File file = jFileChooser.getSelectedFile();
+
+                            try {
+                                pGraph = new ProcessingGraph(Graph.load(file.getAbsolutePath()));
+                            } catch (IOException | ClassNotFoundException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                });
+
         radioButton.getItem(0).addListener(new ControlListener() {
             @Override
             public void controlEvent(ControlEvent theEvent) {
-                addNodeMenu.close();
-                addNodeMenu.enableCollapse();
-
                 currentlySelectedTool = Tool.NO_TOOL;
+
+                resetToolSideEffects();
             }
         });
 
         radioButton.getItem(1).addListener(new ControlListener() {
             @Override
             public void controlEvent(ControlEvent theEvent) {
-                addNodeMenu.open();
-                addNodeMenu.disableCollapse();
+                addNodeMenu.show();
+                addTransition.hide();
+
+                resetToolSideEffects();
 
                 currentlySelectedTool = Tool.ADD_NODE;
             }
@@ -140,8 +208,10 @@ public class Window extends PApplet {
         radioButton.getItem(2).addListener(new ControlListener() {
             @Override
             public void controlEvent(ControlEvent theEvent) {
-                addNodeMenu.close();
-                addNodeMenu.enableCollapse();
+                addNodeMenu.hide();
+                addTransition.show();
+
+                resetToolSideEffects();
 
                 currentlySelectedTool = Tool.ADD_CONNECTION;
             }
@@ -150,8 +220,11 @@ public class Window extends PApplet {
         radioButton.getItem(3).addListener(new ControlListener() {
             @Override
             public void controlEvent(ControlEvent theEvent) {
-                addNodeMenu.close();
-                addNodeMenu.enableCollapse();
+                addNodeMenu.hide();
+                addTransition.hide();
+
+                resetToolSideEffects();
+
                 currentlySelectedTool = Tool.REMOVE_NODE;
             }
         });
@@ -159,11 +232,23 @@ public class Window extends PApplet {
         radioButton.getItem(4).addListener(new ControlListener() {
             @Override
             public void controlEvent(ControlEvent theEvent) {
-                addNodeMenu.close();
-                addNodeMenu.enableCollapse();
+                addNodeMenu.hide();
+                addTransition.hide();
+
+
+                resetToolSideEffects();
+
                 currentlySelectedTool = Tool.REMOVE_CONNECTION;
             }
         });
+    }
+
+    /**
+     * Any temporary changes to the display that a tool makes will be undone by this function
+     */
+    public void resetToolSideEffects() {
+        // The Add Transition tool selects a node as a source node which is displayed in a different colour, reset this
+        pGraph.getNodes().forEach(node -> node.setSelectedAsSource(false));
     }
 
     public void draw() {
@@ -173,10 +258,13 @@ public class Window extends PApplet {
         drawTransitions();
 
         for (ProcessingNode node : pGraph.getNodes()) {
-            fill(0);
+            fill(176);
             if (node.isCursorHoveringOver()) fill(255, 255, 0);
+            if (node.isSelectedAsSource()) fill(0, 255, 0);
 
             ellipse(node.getX(), node.getY(), pGraph.ELLIPSE_DIAMETER, pGraph.ELLIPSE_DIAMETER);
+            if (node.getNode().isAccepting()) ellipse(node.getX(), node.getY(), (float) (pGraph.ELLIPSE_DIAMETER - 0.5),
+                    (float) (pGraph.ELLIPSE_DIAMETER - 0.5));
         }
 
         if (currentlySelectedTool == Tool.ADD_NODE) {
@@ -217,11 +305,11 @@ public class Window extends PApplet {
         nodes.forEach(node -> node.setCursorHoveringOver(false));
 
         // If we're currently hovering over a node, set isCursorHoveringOver to true
-        ProcessingNode currentlyHoveredNode = getNodeCurrentlyBingHoveredOver();
+        ProcessingNode currentlyHoveredNode = getNodeCurrentlyBeingHoveredOver();
         if (currentlyHoveredNode != null) currentlyHoveredNode.setCursorHoveringOver(true);
     }
 
-    public ProcessingNode getNodeCurrentlyBingHoveredOver() {
+    public ProcessingNode getNodeCurrentlyBeingHoveredOver() {
         List<ProcessingNode> nodes = pGraph.getNodes();
 
         /*
@@ -256,13 +344,25 @@ public class Window extends PApplet {
                 removeNode();
                 break;
             case ADD_CONNECTION:
-                //                addConnection();
+                addTransition();
                 break;
 
         }
-
-
     }
+
+    @Override
+    public void mouseDragged() {
+        // If no tool is selected then the user should be able to drag nodes around
+        if (currentlySelectedTool == Tool.NO_TOOL) {
+            for (ProcessingNode node : pGraph.getNodes()) {
+                if (node.isCursorHoveringOver()) {
+                    node.setX(mouseX);
+                    node.setY(mouseY);
+                }
+            }
+        }
+    }
+
 
     /**
      * Adds a node to the graph at the current mouse coordinates with a label from the addNodeLabelTextfield. If
@@ -301,24 +401,34 @@ public class Window extends PApplet {
         }
     }
 
-    //    /**
-    //     * Adds a connection to the graph
-    //     */
-    //    public void addConnection() {
-    //        ProcessingNode currentlyHoveringnode = getNodeCurrentlyBingHoveredOver();
-    //
-    //        if (currentlyHoveringnode)
-    //    }
+    /**
+     * Adds a transition to the graph
+     */
+    public void addTransition() {
+        ProcessingNode currentlyHoveringnode = getNodeCurrentlyBeingHoveredOver();
 
-    @Override
-    public void mouseDragged() {
-        // If no tool is selected then the user should be able to drag nodes around
-        if (currentlySelectedTool == Tool.NO_TOOL) {
-            for (ProcessingNode node : pGraph.getNodes()) {
-                if (node.isCursorHoveringOver()) {
-                    node.setX(mouseX);
-                    node.setY(mouseY);
+        if (currentlyHoveringnode != null) {
+            ProcessingNode sourceNode = null;
+
+            // If there is a node marked as the source node in the ProcessingGraph then store it
+            for (ProcessingNode processingNode : pGraph.getNodes()) {
+                if (processingNode.isSelectedAsSource()) {
+                    sourceNode = processingNode;
+                    break;
                 }
+            }
+
+            // If we didn't find a source node then make the one being hovered over, the new source node
+            if (sourceNode == null) {
+                currentlyHoveringnode.setSelectedAsSource(true);
+            } else {
+                // Otherwise, we did find a source node and we want to make the currently being hovered over
+                // node, the desination
+
+                pGraph.addTransition(sourceNode, currentlyHoveringnode, addTransitionTransitionSymbol.getText());
+
+                sourceNode.setSelectedAsSource(false);
+                sourceNode = null;
             }
         }
     }
