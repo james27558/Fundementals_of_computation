@@ -23,7 +23,7 @@ public class ProcessingNode {
     }
 
     public int getX() {
-        return x;
+        return (int) (x);
     }
 
     public void setX(int x) {
@@ -31,7 +31,7 @@ public class ProcessingNode {
     }
 
     public int getY() {
-        return y;
+        return (int) (y);
     }
 
     public void setY(int y) {

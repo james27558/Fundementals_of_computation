@@ -12,20 +12,34 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-public class Window extends PApplet {
-    static PApplet ref;
+enum Tool {
+    NO_TOOL,
+    ADD_NODE,
+    ADD_CONNECTION,
+    REMOVE_NODE,
+    REMOVE_CONNECTION
+}
 
+public class Window extends PApplet {
+    public static float scaleFactor = 1;
+    static PApplet ref;
     ProcessingGraph pGraph;
     boolean start = false;
-
     ControlP5 controlP5;
     Textfield addNodeLabelTextfield;
     Textfield addTransitionTransitionSymbol;
     Tool currentlySelectedTool = Tool.NO_TOOL;
 
-
     public static void main(String[] args) {
         PApplet.main("automata.visualisation.Window");
+    }
+
+    /**
+     * Any temporary changes to the display that a tool makes will be undone by this function
+     */
+    public void resetToolSideEffects() {
+        // The Add Transition tool selects a node as a source node which is displayed in a different colour, reset this
+        pGraph.getNodes().forEach(node -> node.setSelectedAsSource(false));
     }
 
     public void settings() {
@@ -45,6 +59,7 @@ public class Window extends PApplet {
         try {
             //            graph.save("out.ser");
             graph = Graph.load("out.ser");
+            graph.getNode("A").setAccepting(true);
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
@@ -54,7 +69,10 @@ public class Window extends PApplet {
     }
 
     public void setup() {
+        textAlign(CENTER, CENTER);
         controlP5 = new ControlP5(this);
+
+        System.out.println(textAscent() + " " + textDescent());
 
         // Menu to make a new graph and input an alphabet for that graph, seperated by spaces
         Group g1 = controlP5.addGroup("Make New Graph")
@@ -103,7 +121,7 @@ public class Window extends PApplet {
                 .setNoneSelectedAllowed(false)
                 .activate(0);
 
-
+        // Hidden menu to get the label of the node to be added
         Group addNodeMenu = controlP5.addGroup("Add Node Menu")
                 .setPosition(300, 10)
                 .setWidth(100)
@@ -117,6 +135,7 @@ public class Window extends PApplet {
                 .setPosition(20, 10)
                 .setWidth(60);
 
+        // Hidden menu to get the symbol for a transition to be added
         Group addTransition = controlP5.addGroup("Add Transition Menu")
                 .setPosition(300, 10)
                 .setWidth(100)
@@ -130,6 +149,7 @@ public class Window extends PApplet {
                 .setPosition(20, 10)
                 .setWidth(60);
 
+        // Menu for save / load buttons
         Group saveLoad = controlP5.addGroup("Save / Load")
                 .setPosition(400, 10)
                 .setWidth(80)
@@ -184,6 +204,7 @@ public class Window extends PApplet {
                     }
                 });
 
+        // Set the actions to perform when the radio buttons for the tools menu are clicked
         radioButton.getItem(0).addListener(new ControlListener() {
             @Override
             public void controlEvent(ControlEvent theEvent) {
@@ -243,36 +264,83 @@ public class Window extends PApplet {
         });
     }
 
-    /**
-     * Any temporary changes to the display that a tool makes will be undone by this function
-     */
-    public void resetToolSideEffects() {
-        // The Add Transition tool selects a node as a source node which is displayed in a different colour, reset this
-        pGraph.getNodes().forEach(node -> node.setSelectedAsSource(false));
-    }
-
     public void draw() {
         frameRate(60);
         background(51);
 
+        pushMatrix();
+        // Zoom in, default zoom of 1
+        scale(scaleFactor);
+
+        // Draw the transitions in the graph
         drawTransitions();
 
+        // Draw the nodes
         for (ProcessingNode node : pGraph.getNodes()) {
-            fill(176);
-            if (node.isCursorHoveringOver()) fill(255, 255, 0);
-            if (node.isSelectedAsSource()) fill(0, 255, 0);
-
-            ellipse(node.getX(), node.getY(), pGraph.ELLIPSE_DIAMETER, pGraph.ELLIPSE_DIAMETER);
-            if (node.getNode().isAccepting()) ellipse(node.getX(), node.getY(), (float) (pGraph.ELLIPSE_DIAMETER - 0.5),
-                    (float) (pGraph.ELLIPSE_DIAMETER - 0.5));
+            drawNode(node);
         }
 
+        // If the user has selected the Add Node tool then draw a ghost node over the cursor
         if (currentlySelectedTool == Tool.ADD_NODE) {
             fill(255, 50);
-            ellipse(mouseX, mouseY, pGraph.ELLIPSE_DIAMETER, pGraph.ELLIPSE_DIAMETER);
+            ellipse(mouseX / scaleFactor, mouseY / scaleFactor, pGraph.ELLIPSE_DIAMETER, pGraph.ELLIPSE_DIAMETER);
         }
 
         //        if (start) pGraph.performForceDirectedStep();
+
+        popMatrix();
+    }
+
+
+    public void drawNode(ProcessingNode node) {
+
+        fill(176);
+
+        if (node.isCursorHoveringOver()) fill(255, 255, 0);
+        if (node.isSelectedAsSource()) fill(0, 255, 0);
+
+        ellipse(node.getX(), node.getY(), pGraph.ELLIPSE_DIAMETER, pGraph.ELLIPSE_DIAMETER);
+
+        // If the node is accepting then draw a smaller circle in the node
+        if (node.getNode().isAccepting()) {
+            fill(120);
+            ellipse(node.getX(), node.getY(), (float) (pGraph.ELLIPSE_DIAMETER - 6),
+                    (float) (pGraph.ELLIPSE_DIAMETER - 6));
+        }
+
+        // Display the label of the node
+        fill(0);
+        // If the label is too big then display it below the node, otherwise display it inside the node
+        float textWidth = textWidth(node.getNode().getLabel());
+        if (textWidth > pGraph.ELLIPSE_DIAMETER / 2) {
+            float padding = (pGraph.ELLIPSE_DIAMETER / 2) + (textAscent() / 2);
+
+            noStroke();
+            fill(255, 50);
+            drawTextBackground(node.getX(), node.getY() + padding, textWidth);
+
+            fill(0);
+            stroke(0);
+            text(node.getNode().getLabel(), node.getX(), node.getY() + padding);
+        } else {
+            text(node.getNode().getLabel(), node.getX(), node.getY() - 3);
+        }
+
+    }
+
+
+    /**
+     * Draws a rectangle given some paramters. This is to make a background for text on the canvas.
+     * <p>
+     * ASSUMES textAlign(CENTER, CENTER) which isn't default and rectMode(CORNERS) which is default
+     */
+    public void drawTextBackground(float textCenterX, float textCenterY, float textWidth) {
+        float padding = (float) (0.1 * textWidth);
+        rect(textCenterX - (textWidth / 2) - padding,
+                (float) (textCenterY - (textAscent() / 2.5)),
+                textWidth + 2 * padding,
+                textAscent() + textDescent(),
+                18);
     }
 
     /**
@@ -319,8 +387,9 @@ public class Window extends PApplet {
          */
         for (int i = nodes.size() - 1; i >= 0; i--) {
             ProcessingNode node = nodes.get(i);
+            float distance = dist(mouseX / scaleFactor, mouseY / scaleFactor, node.getX(), node.getY());
 
-            if (dist(mouseX, mouseY, node.getX(), node.getY()) < pGraph.ELLIPSE_DIAMETER / 2.0) {
+            if (distance < pGraph.ELLIPSE_DIAMETER / 2.0) {
                 return node;
             }
         }
@@ -356,13 +425,23 @@ public class Window extends PApplet {
         if (currentlySelectedTool == Tool.NO_TOOL) {
             for (ProcessingNode node : pGraph.getNodes()) {
                 if (node.isCursorHoveringOver()) {
-                    node.setX(mouseX);
-                    node.setY(mouseY);
+                    node.setX((int) (mouseX / scaleFactor));
+                    node.setY((int) (mouseY / scaleFactor));
                 }
             }
         }
     }
 
+    /**
+     *
+     */
+    public void selectNode() {
+        ProcessingNode node = getNodeCurrentlyBeingHoveredOver();
+
+        if (node != null) {
+
+        }
+    }
 
     /**
      * Adds a node to the graph at the current mouse coordinates with a label from the addNodeLabelTextfield. If
@@ -435,14 +514,10 @@ public class Window extends PApplet {
 
     @Override
     public void keyPressed() {
+        System.out.println(keyCode);
         if (keyCode == 32) System.out.println(pGraph.getGraph());
-    }
+        if (keyCode == 45) scaleFactor -= 0.1; // - key
+        if (keyCode == 61) scaleFactor += 0.1; // + key
 
-    enum Tool {
-        NO_TOOL,
-        ADD_NODE,
-        ADD_CONNECTION,
-        REMOVE_NODE,
-        REMOVE_CONNECTION
     }
 }

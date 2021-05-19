@@ -12,7 +12,8 @@ import java.util.List;
  * canvas
  */
 public class ProcessingGraph {
-    final int ELLIPSE_DIAMETER = 25;
+    public static float ELLIPSE_DIAMETER_BASE = 25;
+    public static float ELLIPSE_DIAMETER = ELLIPSE_DIAMETER_BASE;
     private Graph g;
     private List<ProcessingNode> nodes;
 
