@@ -3,6 +3,7 @@ package automata.visualisation;
 import automata.core.Graph;
 import automata.core.Node;
 import automata.core.NodeNotFoundException;
+import processing.core.PVector;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,8 +13,7 @@ import java.util.List;
  * canvas
  */
 public class ProcessingGraph {
-    public static float ELLIPSE_DIAMETER_BASE = 25;
-    public static float ELLIPSE_DIAMETER = ELLIPSE_DIAMETER_BASE;
+    public static float ELLIPSE_DIAMETER = 25;
     private Graph g;
     private List<ProcessingNode> nodes;
 
@@ -74,21 +74,89 @@ public class ProcessingGraph {
                 transitionSymbolString);
     }
 
-    //    /**
-    //     * Takes a point and repels this processing node away from it by a small step
-    //     */
-    //    public void performForceDirectedStep() {
-    //        for (Node n1 : g.nodes) {
-    //            if (n1 instanceof automata.visualisation.ProcessingNode) automata.visualisation.ProcessingNode
-    //            processingNode1 = (automata.visualisation.ProcessingNode) n1;
-    //
-    //            for (Node n2 : g.nodes) {
-    //                automata.visualisation.ProcessingNode processingNode2 = (automata.visualisation.ProcessingNode)
-    //                n2;
-    //                processingNode1.performForceDirectedStep(processingNode2.x, processingNode2.y);
-    //
-    //            }
-    //        }
-    //
-    //    }
+    public List<ProcessingNode> getAllDestinationNodes(ProcessingNode node) {
+        List<ProcessingNode> destinations = new ArrayList<>();
+
+        for (Node underlyingNode : node.getNode().getAllDestinationNodes()) {
+            destinations.add(getNode(underlyingNode));
+        }
+
+        return destinations;
+    }
+
+    public void startForceDirectedLayout() {
+        for (ProcessingNode node : getNodes()) {
+            PVector position = new PVector(Window.ref.random(1), Window.ref.random(1));
+            position.x = position.x * Window.CANVAS_WIDTH;
+            position.y = position.y * Window.CANVAS_HEIGHT;
+            node.setPosition(position);
+        }
+    }
+
+    /**
+     * Takes a point and repels this processing node away from it by a small step
+     */
+    public void stepForceDirectedLayout() {
+        int c1 = 2;
+        int c2 = 1;
+        int c3 = 1;
+        float c4 = 0.1f;
+
+        PVector overallForce = new PVector();
+
+        for (ProcessingNode sourceNode : getNodes()) {
+            PVector sourceNodePos = sourceNode.getPosition();
+
+            for (ProcessingNode adjacentNode : getAllDestinationNodes(sourceNode)) {
+                PVector otherNodePos = adjacentNode.getPosition();
+
+                PVector directionToApplyForce = sourceNodePos.copy()
+                        .sub(otherNodePos)
+                        .normalize();
+
+                PVector distance = otherNodePos.copy().sub(sourceNodePos);
+                PVector unitDistance = distance.copy().normalize();
+                PVector force = new PVector(1 / unitDistance.x, 1 / unitDistance.y);
+
+                overallForce.add(force);
+            }
+
+            for (ProcessingNode otherNode : getNodes()) {
+                if (otherNode.equals(sourceNode)) continue;
+
+                PVector otherNodePos = otherNode.getPosition();
+
+
+            }
+
+            sourceNodePos.add(overallForce);
+        }
+
+    }
+
+    private static class PVectorHelper {
+        private static PVector mult(PVector v1, PVector v2) {
+            return new PVector(v1.x * v2.x, v1.y * v2.y);
+        }
+
+        private static PVector mult(PVector vector, float xMult, float yMult) {
+            return new PVector(vector.x * xMult, vector.y * yMult);
+        }
+
+        private static PVector abs(PVector vector) {
+            return new PVector(Window.abs(vector.x), Window.abs(vector.x));
+        }
+
+        private static PVector pow(PVector vector, int power) {
+            return new PVector((float) Math.pow(vector.x, power), (float) Math.pow(vector.y, power));
+        }
+
+        private static PVector div(PVector v1, PVector v2) {
+            return new PVector(v1.x / v2.x, v1.y / v2.y);
+        }
+
+        private static PVector log(PVector vector) {
+            return new PVector((float) Math.log(vector.x), (float) Math.log(vector.y));
+        }
+    }
 }

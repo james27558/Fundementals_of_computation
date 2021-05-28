@@ -22,6 +22,8 @@ enum Tool {
 
 public class Window extends PApplet {
     public static float scaleFactor = 1;
+    public static int CANVAS_WIDTH = 800;
+    public static int CANVAS_HEIGHT = 600;
     static PApplet ref;
     ProcessingGraph pGraph;
     boolean start = false;
@@ -65,6 +67,7 @@ public class Window extends PApplet {
         }
 
         pGraph = new ProcessingGraph(graph);
+        pGraph.startForceDirectedLayout();
 
     }
 
@@ -279,6 +282,7 @@ public class Window extends PApplet {
         for (ProcessingNode node : pGraph.getNodes()) {
             drawNode(node);
         }
+
 
         // If the user has selected the Add Node tool then draw a ghost node over the cursor
         if (currentlySelectedTool == Tool.ADD_NODE) {
@@ -515,7 +519,7 @@ public class Window extends PApplet {
     @Override
     public void keyPressed() {
         System.out.println(keyCode);
-        if (keyCode == 32) System.out.println(pGraph.getGraph());
+        if (keyCode == 32) pGraph.stepForceDirectedLayout();
         if (keyCode == 45) scaleFactor -= 0.1; // - key
         if (keyCode == 61) scaleFactor += 0.1; // + key
 

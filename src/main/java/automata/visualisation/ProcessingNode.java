@@ -1,14 +1,14 @@
 package automata.visualisation;
 
 import automata.core.Node;
+import processing.core.PVector;
 
 /**
  * This class holds information about nodes neccessary to draw them to the screen like coorindates and whether it's
  * sleected
  */
 public class ProcessingNode {
-    private int x;
-    private int y;
+    private PVector position;
 
     private Node node;
 
@@ -18,24 +18,31 @@ public class ProcessingNode {
 
     public ProcessingNode(Node node) {
         this.node = node;
-        x = 20;
-        y = 20;
+        position = new PVector(20, 20);
+    }
+
+    public PVector getPosition() {
+        return position;
+    }
+
+    public void setPosition(PVector position) {
+        this.position = position;
     }
 
     public int getX() {
-        return (int) (x);
+        return (int) position.x;
     }
 
     public void setX(int x) {
-        this.x = x;
+        position.x = x;
     }
 
     public int getY() {
-        return (int) (y);
+        return (int) position.y;
     }
 
     public void setY(int y) {
-        this.y = y;
+        position.y = y;
     }
 
     public Node getNode() {
@@ -59,8 +66,7 @@ public class ProcessingNode {
     }
 
     public void performForceDirectedStep(int repulsiveX, int repulsiveY) {
-        x += x - repulsiveX;
-        y += y - repulsiveY;
+
     }
 
 

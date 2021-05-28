@@ -97,6 +97,20 @@ public class Node implements Serializable {
     }
 
     /**
+     * Gets all the destination nodes that this node can transition to
+     *
+     * @return All destinations of the transitions from this node
+     */
+    public List<Node> getAllDestinationNodes() {
+        List<Node> destinations = new ArrayList<>();
+        for (Transition transition : getTransitions()) {
+            destinations.add(transition.getDestination());
+        }
+
+        return destinations;
+    }
+
+    /**
      * @return Gets the label of the node
      */
     public String getLabel() {
